@@ -26,7 +26,7 @@ services:
     image: postgres:13
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: Ayusha123
+      POSTGRES_PASSWORD: postgres
       POSTGRES_DB: go_memo
     ports:
       - 5432:5432
