@@ -11,6 +11,7 @@ type dataType = {
   id: number;
   head: string;
   body: string;
+  createdAt: string;
 };
 
 export default function Memo({ params }: { params: { id: string } }) {
@@ -47,17 +48,27 @@ export default function Memo({ params }: { params: { id: string } }) {
     } catch (err) {
       console.log(err);
     }
-    router.back();
+    router.push("/"); // Navigate to the home page
+    router.refresh();
   };
 
   const handleSave = async () => {
     try {
       if (isNew) {
-        await axios.post(URL, { head: head, body: body });
+        await axios.post(URL, {
+          head: head,
+          body: body,
+          createdAt: new Date().toLocaleString(),
+        });
       } else {
-        await axios.put(URL + "/" + idNo, { head: head, body: body });
+        await axios.put(URL + "/" + idNo, {
+          head: head,
+          body: body,
+          createdAt: new Date().toLocaleString(),
+        });
       }
-      router.back();
+      router.push("/"); // Navigate to the home page
+      router.refresh();
     } catch (err) {
       console.log(err);
     }

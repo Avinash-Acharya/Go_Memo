@@ -16,6 +16,7 @@ type Note struct {
 	Id     int    `json:"id"`
 	Head string `json:"head"`
 	Body   string `json:"body"`
+	CreatedAt string `json:"createdAt"`
 }
 
 func main() {
@@ -31,7 +32,7 @@ func main() {
 	defer db.Close()
 
 	// create table if not exists
-	_, err = db.Exec("CREATE TABLE IF NOT EXISTS notes (id SERIAL PRIMARY KEY, head TEXT, body TEXT)")
+	_, err = db.Exec("CREATE TABLE IF NOT EXISTS notes (id SERIAL PRIMARY KEY, head TEXT, body TEXT, createdAt TEXT)")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -89,7 +90,7 @@ func getNotes(db *sql.DB) http.HandlerFunc {
 		notes := []Note{} // array of notes
 		for rows.Next() {
 			var n Note
-			if err := rows.Scan(&n.Id, &n.Head, &n.Body); err != nil {
+			if err := rows.Scan(&n.Id, &n.Head, &n.Body, &n.CreatedAt); err != nil {
 				log.Fatal(err)
 			}
 			notes = append(notes, n)
@@ -107,7 +108,7 @@ func getNote(db *sql.DB) http.HandlerFunc {
 		vars := mux.Vars(r)
 		id := vars["id"]
 		var n Note
-		err := db.QueryRow("SELECT * FROM notes WHERE id = $1", id).Scan(&n.Id, &n.Head, &n.Body)
+		err := db.QueryRow("SELECT * FROM notes WHERE id = $1", id).Scan(&n.Id, &n.Head, &n.Body, &n.CreatedAt)
 		if err != nil {
 			w.WriteHeader(http.StatusNotFound)
 			return
@@ -122,7 +123,7 @@ func createNote(db *sql.DB) http.HandlerFunc {
 		var n Note
 		json.NewDecoder(r.Body).Decode(&n)
 
-		err := db.QueryRow("INSERT INTO notes (head, body) VALUES ($1, $2) RETURNING id", n.Head, n.Body).Scan(&n.Id)
+		err := db.QueryRow("INSERT INTO notes (head, body, createdAt) VALUES ($1, $2, $3) RETURNING id", n.Head, n.Body, n.CreatedAt).Scan(&n.Id)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -140,14 +141,14 @@ func updateNote(db *sql.DB) http.HandlerFunc {
 		id := vars["id"]
 
 		// Execute the update query
-		_, err := db.Exec("UPDATE notes SET head = $1, body = $2 WHERE id = $3", n.Head, n.Body, id)
+		_, err := db.Exec("UPDATE notes SET head = $1, body = $2, createdAt = $3 WHERE id = $4", n.Head, n.Body, n.CreatedAt, id)
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		// Retrieve the updated user data from the database
 		var updatedNote Note
-		err = db.QueryRow("SELECT id, head, body FROM notes WHERE id = $1", id).Scan(&updatedNote.Id, &updatedNote.Head, &updatedNote.Body)
+		err = db.QueryRow("SELECT id, head, body, createdAt FROM notes WHERE id = $1", id).Scan(&updatedNote.Id, &updatedNote.Head, &updatedNote.Body, &updatedNote.CreatedAt)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -163,7 +164,7 @@ func deleteNote(db *sql.DB) http.HandlerFunc {
 		id := vars["id"]
 
 		var n Note
-		err := db.QueryRow("SELECT * FROM notes WHERE id = $1", id).Scan(&n.Id, &n.Head, &n.Body)
+		err := db.QueryRow("SELECT * FROM notes WHERE id = $1", id).Scan(&n.Id, &n.Head, &n.Body, &n.CreatedAt)
 		if err != nil {
 			w.WriteHeader(http.StatusNotFound)
 			return
@@ -174,7 +175,7 @@ func deleteNote(db *sql.DB) http.HandlerFunc {
 				return
 			}
 
-			json.NewEncoder(w).Encode("User deleted")
+			json.NewEncoder(w).Encode("Note deleted")
 		}
 	}
 }

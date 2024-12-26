@@ -1,4 +1,3 @@
-// import axios from "axios";
 import Cards from "./_components/cards";
 import CreateButton from "./_components/createbutton";
 
@@ -8,19 +7,16 @@ type dataType = {
   id: number;
   head: string;
   body: string;
-  // createdAt: Date;
+  createdAt: string;
 }[];
 
 async function getAllData() {
   try {
-    // const res = await axios.get(URL, { cache: false });
-    // const res = await axios.get(`${URL}?t=${new Date().getTime()}`);
     const data = await fetch(URL, { cache: "no-store" });
     const allData: dataType = (await data.json()) as dataType;
-    // const allData: dataType = (res.data as dataType).reverse();
     return allData.reverse();
   } catch (err) {
-    console.log(err);
+    console.log("Error while fetching all the notes : ", err);
   }
 }
 
@@ -46,7 +42,7 @@ export default async function HomePage() {
               id={data.id}
               head={data.head}
               body={data.body}
-              // createdAt={data.createdAt}
+              createdAt={data.createdAt}
             />
           ))
         ) : (
