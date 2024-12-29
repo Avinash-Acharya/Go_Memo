@@ -5,7 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-const URL = "http://localhost:8000/api/go/users";
+const URL =
+  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/go/users";
 
 type dataType = {
   id: number;

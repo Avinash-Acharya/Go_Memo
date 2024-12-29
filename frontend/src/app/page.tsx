@@ -1,7 +1,9 @@
+import axios from "axios";
 import Cards from "./_components/cards";
 import CreateButton from "./_components/createbutton";
 
-const URL = "http://localhost:8000/api/go/users";
+const URL =
+  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/go/users";
 
 type dataType = {
   id: number;
@@ -10,10 +12,14 @@ type dataType = {
   createdAt: string;
 }[];
 
+export const revalidate = 0;
+
 async function getAllData() {
   try {
-    const data = await fetch(URL, { cache: "no-store" });
-    const allData: dataType = (await data.json()) as dataType;
+    // const data = await fetch(URL, { cache: "no-store" });
+    // const allData: dataType = (await data.json()) as dataType;
+    const response = await axios.get(URL);
+    const allData: dataType = response.data as dataType;
     return allData.reverse();
   } catch (err) {
     console.log("Error while fetching all the notes : ", err);

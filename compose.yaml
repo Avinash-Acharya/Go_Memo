@@ -5,6 +5,8 @@ services:
     build:
       context: ./frontend
       dockerfile: next.dockerfile
+    environment:
+      - NEXT_PUBLIC_API_URL= http://goapp:8000/api/go/users
     ports:
       - "3000:3000"
     depends_on:
@@ -16,7 +18,7 @@ services:
       context: ./backend
       dockerfile: go.dockerfile
     environment:
-      DATABASE_URL: user=postgres password=Ayusha123 dbname=go_memo sslmode=disable
+      DATABASE_URL: "postgres://postgres:postgres@db:5432/go_memo?sslmode=disable"
     ports:
       - "8000:8000"
     depends_on:

@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -50,6 +51,7 @@ func main() {
 
 	// start server
 	log.Fatal(http.ListenAndServe(":8000", enhancedRouter))
+	fmt.Println("Server is running at 127.0.0.1:8080")
 }
 
 func enableCORS(next http.Handler) http.Handler {
