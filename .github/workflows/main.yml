@@ -1,0 +1,67 @@
+name: Build and Test Docker Images
+
+on:
+  push:
+    branches:
+      - main  
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build the Docker Image 
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Verify Image
+        run: |
+          test -f ./frontend/next.dockerfile || { echo "Frontend Dockerfile missing"; exit 1; }
+          test -f ./backend/go.dockerfile || { echo "Backend Dockerfile missing"; exit 1; }
+          test -f ./docker-compose.yml || { echo "docker-compose.yml missing"; exit 1; }
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build and Start Containers
+        run: docker-compose up -d
+      
+      - name: Wait for Services to Start
+        run: sleep 10  
+
+  test:
+    name: Test the Intigrity of the Images Running
+    needs: build        
+    runs-on: ubuntu-latest
+
+
+    steps:
+      - name: Check if Backend (Mux Server) is Running
+        run: |
+          curl -f http://localhost:8000/api/go/users || exit 1
+
+      - name: Check if Frontend (Next.js) is Running
+        run: |
+          curl -f http://localhost:3000 || exit 1
+
+      - name: Stop Containers
+        run: docker-compose down
+
+      # - name: Build and Push Next.js Frontend Image
+      #   uses: docker/build-push-action@v4
+      #   with:
+      #     context: ./frontend
+      #     file: ./frontend/next.dockerfile
+      #     push: true
+      #     tags: your-dockerhub-username/nextapp:latest
+
+      # - name: Build and Push Golang Backend Image
+      #   uses: docker/build-push-action@v4
+      #   with:
+      #     context: ./backend
+      #     file: ./backend/go.dockerfile
+      #     push: true
+      #     tags: your-dockerhub-username/goapp:latest
